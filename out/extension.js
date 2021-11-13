@@ -7,6 +7,7 @@ const vscode = require("vscode");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const KubeditorPanel_1 = require("./panels/KubeditorPanel");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
@@ -54,7 +55,14 @@ function activate(context) {
             }
         }
     });
+    let disposablePanel = vscode.commands.registerCommand('kubeditor.open-kubeditor', () => {
+        // The code you place here will be executed every time your command is executed
+        // Display a message box to the user
+        vscode.window.showInformationMessage('Hello World from kubeditor!');
+        KubeditorPanel_1.KubeditorPanel.render(context.extensionUri);
+    });
     context.subscriptions.push(disposable);
+    context.subscriptions.push(disposablePanel);
 }
 exports.activate = activate;
 // this method is called when your extension is deactivated

@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
+import { KubeditorPanel } from "./panels/KubeditorPanel";
 
 
 // this method is called when your extension is activated
@@ -57,7 +58,17 @@ export function activate(context: vscode.ExtensionContext) {
       }
 	);
 
+	let disposablePanel = vscode.commands.registerCommand('kubeditor.open-kubeditor', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('Hello World from kubeditor!');
+    KubeditorPanel.render(context.extensionUri);
+
+      }
+	);
+
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposablePanel);
 }
 
 // this method is called when your extension is deactivated
