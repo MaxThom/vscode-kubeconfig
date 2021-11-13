@@ -22,19 +22,7 @@ function activate(context) {
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from kubeditor!');
         // Load configuration
-        const config = vscode.workspace.getConfiguration("vs-kubernetes");
-        let kubeconfigs = [
-            config["vs-kubernetes.kubeconfig"],
-            ...config["vs-kubernetes.knownKubeconfigs"],
-        ];
-        const defaultKubeconfig = path.join(os.homedir(), '.kube', 'config');
-        if (fs.lstatSync(defaultKubeconfig).isFile()) {
-            kubeconfigs.unshift(defaultKubeconfig);
-        }
-        if (process.platform === "win32") {
-            kubeconfigs = kubeconfigs.map((kp) => kp.toLowerCase());
-        }
-        kubeconfigs = [...new Set(kubeconfigs)].filter((k) => k !== '');
+        let kubeconfigs = getKubeconfigFiles();
         if (kubeconfigs.length > 0) {
             if (kubeconfigs.length === 1) {
                 if (fs.lstatSync(kubeconfigs[0]).isFile()) {
@@ -59,7 +47,8 @@ function activate(context) {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from kubeditor!');
-        KubeditorPanel_1.KubeditorPanel.render(context.extensionUri);
+        let kubeconfigs = getKubeconfigFiles();
+        KubeditorPanel_1.KubeditorPanel.render(context.extensionUri, kubeconfigs);
     });
     context.subscriptions.push(disposable);
     context.subscriptions.push(disposablePanel);
@@ -76,5 +65,21 @@ function open(kubeconfig) {
             preview: false
         });
     });
+}
+function getKubeconfigFiles() {
+    const config = vscode.workspace.getConfiguration("vs-kubernetes");
+    let kubeconfigs = [
+        config["vs-kubernetes.kubeconfig"],
+        ...config["vs-kubernetes.knownKubeconfigs"],
+    ];
+    const defaultKubeconfig = path.join(os.homedir(), '.kube', 'config');
+    if (fs.lstatSync(defaultKubeconfig).isFile()) {
+        kubeconfigs.unshift(defaultKubeconfig);
+    }
+    if (process.platform === "win32") {
+        kubeconfigs = kubeconfigs.map((kp) => kp.toLowerCase());
+    }
+    kubeconfigs = [...new Set(kubeconfigs)].filter((k) => k !== '');
+    return kubeconfigs;
 }
 //# sourceMappingURL=extension.js.map

@@ -1,27 +1,36 @@
 import * as vscode from "vscode";
 import { getUri } from "../utilities/getUri";
+import { Uri } from "vscode";
+const fs = require('fs');
 
 export class KubeditorPanel {
   public static currentPanel: KubeditorPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, kubeconfigs: any[]) {
     this._panel = panel;
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, kubeconfigs);
     this._setWebviewMessageListener(this._panel.webview);
     this._panel.onDidDispose(this.dispose, null, this._disposables);
   }
 
-  public static render(extensionUri: vscode.Uri) {
+  public static render(extensionUri: vscode.Uri, kubeconfigs: any[]) {
     if (KubeditorPanel.currentPanel) {
         KubeditorPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("helloworld", "Hello World", vscode.ViewColumn.One, {
-        enableScripts: true,
+
+      let kubeconfigsUri: Uri[] = [];
+      for (var config of kubeconfigs) {
+        kubeconfigsUri.push(Uri.file(config));
+      }
+
+      const panel = vscode.window.createWebviewPanel("kubeditor", "KubEditor", vscode.ViewColumn.One, {
+        enableScripts: true
+        //localResourceRoots: kubeconfigsUri
       });
 
-      KubeditorPanel.currentPanel = new KubeditorPanel(panel, extensionUri);
+      KubeditorPanel.currentPanel = new KubeditorPanel(panel, extensionUri, kubeconfigs);
     }
   }
 
@@ -38,7 +47,7 @@ export class KubeditorPanel {
     }
   }
 
-  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, kubeconfigs: any[]) {
     const toolkitUri = getUri(webview, extensionUri, [
         "node_modules",
         "@vscode",
@@ -48,6 +57,15 @@ export class KubeditorPanel {
       ]);
 
     const mainUri = getUri(webview, extensionUri, ["media","main.js"]);
+
+    let kubeconfigsUri: Uri[] = [];
+    for (var config of kubeconfigs) {
+      console.log(config);
+      kubeconfigsUri.push(getUri(webview, Uri.parse(config), []));
+    }
+
+    const data = fs.readFileSync(kubeconfigs[0], 'utf8');
+    console.log(data);
 
     return /*html*/ `
     <!DOCTYPE html>
@@ -62,6 +80,7 @@ export class KubeditorPanel {
         <body>
         <h1>Hello World!</h1>
         <vscode-button id="howdy">Howdy!</vscode-button>
+        <vscode-text-area value="${data}" cols="200" rows="25" resize="vertical">Kubeconfig</vscode-text-area>
         </body>
     </html>
     `;
