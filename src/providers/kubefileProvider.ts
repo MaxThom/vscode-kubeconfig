@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as os from "os";
 import * as vscode from 'vscode';
-import { load } from "js-yaml";
+import { load, dump } from "js-yaml";
 import { KubeConfig } from "../types/kube";
 const fs = require('fs');
 
@@ -27,4 +27,13 @@ export function getKubeconfigFiles(): string[] {
 export function getKubeconfigTypeFromFile(filepath: string): KubeConfig {
   const yaml = load(fs.readFileSync(filepath, "utf8")) as KubeConfig;
   return yaml;
+}
+
+export function setKubeconfigFileFromType(filepath: string, config: KubeConfig) {
+  fs.writeFile(filepath, dump(config), (err: any) => {
+      if (err) {
+          console.log(err);
+      }
+  });
+
 }

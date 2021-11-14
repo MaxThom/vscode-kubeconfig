@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKubeconfigTypeFromFile = exports.getKubeconfigFiles = void 0;
+exports.setKubeconfigFileFromType = exports.getKubeconfigTypeFromFile = exports.getKubeconfigFiles = void 0;
 const path = require("path");
 const os = require("os");
 const vscode = require("vscode");
@@ -28,4 +28,12 @@ function getKubeconfigTypeFromFile(filepath) {
     return yaml;
 }
 exports.getKubeconfigTypeFromFile = getKubeconfigTypeFromFile;
+function setKubeconfigFileFromType(filepath, config) {
+    fs.writeFile(filepath, (0, js_yaml_1.dump)(config), (err) => {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+exports.setKubeconfigFileFromType = setKubeconfigFileFromType;
 //# sourceMappingURL=kubefileProvider.js.map

@@ -1,6 +1,7 @@
-import { getKubeconfigFiles, getKubeconfigTypeFromFile } from "../providers/kubefileProvider";
+import { getKubeconfigFiles, getKubeconfigTypeFromFile, setKubeconfigFileFromType } from "../providers/kubefileProvider";
 import { KubeConfig } from "../types/kube";
 import * as vscode from "vscode";
+import { openFileInEditor } from "../utilities/vscodeInteraction";
 const fs = require('fs');
 
 export class KubeditorController {
@@ -20,6 +21,12 @@ export class KubeditorController {
 
     public onHelloCommand(text: string) {
         vscode.window.showInformationMessage(text);
+    }
+
+    public onSaveCommand(text: string) {
+        vscode.window.showInformationMessage(text);
+        setKubeconfigFileFromType("C:/Users/maxth/Desktop/vscode-kubeconfig/kubeditor/kubeconfigs/kubeconfig", this._kubeconfigTypes[0]);
+        openFileInEditor("C:/Users/maxth/Desktop/vscode-kubeconfig/kubeditor/kubeconfigs/kubeconfig");
     }
 
 }

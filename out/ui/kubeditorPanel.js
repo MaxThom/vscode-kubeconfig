@@ -41,6 +41,10 @@ class KubeditorPanel {
     }
     _getWebviewContent(webview, extensionUri) {
         const mainUri = (0, getUri_1.getUri)(webview, extensionUri, ["media", "main.js"]);
+        const bootstrapCss = (0, getUri_1.getUri)(webview, extensionUri, ["media", "bootstrap.min.css"]);
+        const bootstrapUtilCss = (0, getUri_1.getUri)(webview, extensionUri, ["media", "bootstrap-utilities.min.css"]);
+        const bootstrapGridCss = (0, getUri_1.getUri)(webview, extensionUri, ["media", "bootstrap-grid.min.css"]);
+        const bootstrapJs = (0, getUri_1.getUri)(webview, extensionUri, ["media", "bootstrap.bundle.min.js"]);
         const toolkitUri = (0, getUri_1.getUri)(webview, extensionUri, [
             "node_modules",
             "@vscode",
@@ -52,16 +56,20 @@ class KubeditorPanel {
     <!DOCTYPE html>
     <html lang="en">
         <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0">
-        <script type="module" src="${toolkitUri}"></script>
-        <script type="module" src="${mainUri}"></script>
-        <title>Hello World!</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <link href="${bootstrapGridCss}" rel="stylesheet">
+          <link href="${bootstrapUtilCss}" rel="stylesheet">
+          <script type="module" src="${toolkitUri}"></script>
+          <script type="module" src="${mainUri}"></script>
+          <script src="${bootstrapJs}"></script>
+          <title>Hello World!</title>
         </head>
         <body>
-        <h1>Hello World!</h1>
-        <vscode-button id="howdy">Howdy!</vscode-button>
-        <vscode-text-area value="${this._controller._kubeconfigContent[0]}" cols="200" rows="25" resize="vertical">Kubeconfig</vscode-text-area>
+          <h1>Hello World!</h1>
+          <vscode-button id="howdy">Howdy!</vscode-button>
+          <vscode-text-area value="${this._controller._kubeconfigContent[0]}" cols="200" rows="25" resize="vertical">Kubeconfig</vscode-text-area>
+          <vscode-button id="save">Save</vscode-button>
         </body>
     </html>
     `;
@@ -74,9 +82,12 @@ class KubeditorPanel {
                 case "hello":
                     this._controller.onHelloCommand(text);
                     return;
+                case "save":
+                    this._controller.onSaveCommand(text);
+                    return;
             }
         }, undefined, this._disposables);
     }
 }
 exports.KubeditorPanel = KubeditorPanel;
-//# sourceMappingURL=kubeditorPanel.js.map
+//# sourceMappingURL=KubeditorPanel.js.map
