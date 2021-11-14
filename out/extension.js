@@ -4,10 +4,11 @@ exports.deactivate = exports.activate = void 0;
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
-const path = require("path");
 const fs = require("fs");
-const os = require("os");
-const KubeditorPanel_1 = require("./panels/KubeditorPanel");
+const KubeditorPanel_1 = require("./ui/KubeditorPanel");
+const kubefileProvider_1 = require("./providers/kubefileProvider");
+const vscodeInteraction_1 = require("./utilities/vscodeInteraction");
+const kubeditorController_1 = require("./business/kubeditorController");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
@@ -22,11 +23,11 @@ function activate(context) {
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from kubeditor!');
         // Load configuration
-        let kubeconfigs = getKubeconfigFiles();
+        let kubeconfigs = (0, kubefileProvider_1.getKubeconfigFiles)();
         if (kubeconfigs.length > 0) {
             if (kubeconfigs.length === 1) {
                 if (fs.lstatSync(kubeconfigs[0]).isFile()) {
-                    open(kubeconfigs[0]);
+                    (0, vscodeInteraction_1.openFileInEditor)(kubeconfigs[0]);
                 }
             }
             else {
@@ -36,7 +37,7 @@ function activate(context) {
                     .then((selectedKubeconfig) => {
                     if (selectedKubeconfig) {
                         if (fs.lstatSync(selectedKubeconfig).isFile()) {
-                            open(selectedKubeconfig);
+                            (0, vscodeInteraction_1.openFileInEditor)(selectedKubeconfig);
                         }
                     }
                 });
@@ -46,9 +47,9 @@ function activate(context) {
     let disposablePanel = vscode.commands.registerCommand('kubeditor.open-kubeditor', () => {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from kubeditor!');
-        let kubeconfigs = getKubeconfigFiles();
-        KubeditorPanel_1.KubeditorPanel.render(context.extensionUri, kubeconfigs);
+        vscode.window.showInformationMessage('Hello World from KubEditor!');
+        let controller = new kubeditorController_1.KubeditorController();
+        KubeditorPanel_1.KubeditorPanel.render(context.extensionUri, controller);
     });
     context.subscriptions.push(disposable);
     context.subscriptions.push(disposablePanel);
@@ -57,29 +58,4 @@ exports.activate = activate;
 // this method is called when your extension is deactivated
 function deactivate() { }
 exports.deactivate = deactivate;
-function open(kubeconfig) {
-    const openPath = vscode.Uri.file(kubeconfig);
-    vscode.workspace.openTextDocument(openPath).then((doc) => {
-        vscode.window.showTextDocument(doc, {
-            viewColumn: vscode.ViewColumn.Beside,
-            preview: false
-        });
-    });
-}
-function getKubeconfigFiles() {
-    const config = vscode.workspace.getConfiguration("vs-kubernetes");
-    let kubeconfigs = [
-        config["vs-kubernetes.kubeconfig"],
-        ...config["vs-kubernetes.knownKubeconfigs"],
-    ];
-    const defaultKubeconfig = path.join(os.homedir(), '.kube', 'config');
-    if (fs.lstatSync(defaultKubeconfig).isFile()) {
-        kubeconfigs.unshift(defaultKubeconfig);
-    }
-    if (process.platform === "win32") {
-        kubeconfigs = kubeconfigs.map((kp) => kp.toLowerCase());
-    }
-    kubeconfigs = [...new Set(kubeconfigs)].filter((k) => k !== '');
-    return kubeconfigs;
-}
 //# sourceMappingURL=extension.js.map

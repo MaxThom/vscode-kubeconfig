@@ -4,7 +4,11 @@ import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
-import { KubeditorPanel } from "./panels/KubeditorPanel";
+import { KubeditorPanel } from "./ui/KubeditorPanel";
+import { getKubeconfigFiles } from "./providers/kubefileProvider";
+import { openFileInEditor } from "./utilities/vscodeInteraction";
+import { KubeditorController } from './business/kubeditorController';
+
 
 
 // this method is called when your extension is activated
@@ -28,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (kubeconfigs.length > 0) {
       if (kubeconfigs.length === 1) {
         if (fs.lstatSync(kubeconfigs[0]).isFile()) {
-          open(kubeconfigs[0]);
+          openFileInEditor(kubeconfigs[0]);
         }
       } else {
         vscode.window.showQuickPick(kubeconfigs, {
@@ -37,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
         .then((selectedKubeconfig) => {
           if (selectedKubeconfig) {
             if (fs.lstatSync(selectedKubeconfig).isFile()) {
-              open(selectedKubeconfig);
+              openFileInEditor(selectedKubeconfig);
             }
           }
         });
@@ -48,12 +52,11 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposablePanel = vscode.commands.registerCommand('kubeditor.open-kubeditor', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from kubeditor!');
-    let kubeconfigs = getKubeconfigFiles();
-    KubeditorPanel.render(context.extensionUri, kubeconfigs);
+		vscode.window.showInformationMessage('Hello World from KubEditor!');
 
-      }
-	);
+    let controller: KubeditorController = new KubeditorController();
+    KubeditorPanel.render(context.extensionUri, controller);
+  });
 
 	context.subscriptions.push(disposable);
 	context.subscriptions.push(disposablePanel);
@@ -62,31 +65,3 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {}
 
-function open(kubeconfig: string) {
-	const openPath = vscode.Uri.file(kubeconfig);
-	vscode.workspace.openTextDocument(openPath).then((doc) => {
-	  vscode.window.showTextDocument(doc, {
-		viewColumn: vscode.ViewColumn.Beside,
-		preview: false
-	  });
-	});
-}
-
-function getKubeconfigFiles() {
-  const config = vscode.workspace.getConfiguration("vs-kubernetes");
-  let kubeconfigs = [
-    config["vs-kubernetes.kubeconfig"],
-    ...config["vs-kubernetes.knownKubeconfigs"],
-  ];
-  const defaultKubeconfig = path.join(os.homedir(), '.kube', 'config');
-
-  if (fs.lstatSync(defaultKubeconfig).isFile()) {
-    kubeconfigs.unshift(defaultKubeconfig);
-  }
-  if (process.platform === "win32") {
-    kubeconfigs = kubeconfigs.map((kp) => kp.toLowerCase());
-  }
-
-  kubeconfigs = [...new Set(kubeconfigs)].filter((k) => k !== '');
-  return kubeconfigs;
-}

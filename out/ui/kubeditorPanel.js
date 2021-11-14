@@ -79,4 +79,4 @@ class KubeditorPanel {
     }
 }
 exports.KubeditorPanel = KubeditorPanel;
-//# sourceMappingURL=KubeditorPanel.js.map
+//# sourceMappingURL=kubeditorPanel.js.map
